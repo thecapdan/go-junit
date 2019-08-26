@@ -168,12 +168,12 @@ Multiple top level `testsuite` tags, containing multiple `testcase` instances.
 
 This code is distributed under the [MIT License][license-link], see [LICENSE.txt][license-file] for more information.
 
-[circleci-badge]:   https://circleci.com/gh/joshdk/go-junit.svg?&style=shield
-[circleci-link]:    https://circleci.com/gh/joshdk/go-junit/tree/master
-[go-report-badge]:  https://goreportcard.com/badge/github.com/joshdk/go-junit
-[go-report-link]:   https://goreportcard.com/report/github.com/joshdk/go-junit
-[godoc-badge]:      https://godoc.org/github.com/joshdk/go-junit?status.svg
-[godoc-link]:       https://godoc.org/github.com/joshdk/go-junit
+[circleci-badge]:   https://circleci.com/gh/goddenrich/go-junit.svg?&style=shield
+[circleci-link]:    https://circleci.com/gh/goddenrich/go-junit/tree/master
+[go-report-badge]:  https://goreportcard.com/badge/github.com/goddenrich/go-junit
+[go-report-link]:   https://goreportcard.com/report/github.com/goddenrich/go-junit
+[godoc-badge]:      https://godoc.org/github.com/goddenrich/go-junit?status.svg
+[godoc-link]:       https://godoc.org/github.com/goddenrich/go-junit
 [license-badge]:    https://img.shields.io/badge/license-MIT-green.svg
-[license-file]:     https://github.com/joshdk/go-junit/blob/master/LICENSE.txt
+[license-file]:     https://github.com/goddenrich/go-junit/blob/master/LICENSE.txt
 [license-link]:     https://opensource.org/licenses/MIT
