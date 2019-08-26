@@ -5,6 +5,7 @@
 package junit
 
 import (
+	"bytes"
 	"fmt"
 	"testing"
 
@@ -19,7 +20,7 @@ func TestInjest(t *testing.T) {
 	}{
 		{
 			title: "xml input",
-			input: []byte(`<testsuite errors="0" failures="1" file="Foo.java"><testcase name="unit tests" file="Foo.java"/></testsuite>`),
+			input: []byte(`<testsuites><testsuite errors="0" failures="1" file="Foo.java"><testcase name="unit tests" file="Foo.java"/></testsuite></testsuites>`),
 			expected: []Suite{
 				{
 					Tests: []Test{
@@ -45,7 +46,7 @@ func TestInjest(t *testing.T) {
 		name := fmt.Sprintf("#%d - %s", index+1, test.title)
 
 		t.Run(name, func(t *testing.T) {
-			actual, err := Ingest(test.input)
+			actual, err := Ingest(bytes.NewReader(test.input))
 			require.Nil(t, err)
 			require.NotEmpty(t, actual)
 			require.Equal(t, test.expected, actual)

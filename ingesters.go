@@ -5,7 +5,7 @@
 package junit
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -42,7 +42,7 @@ func IngestFiles(filenames []string) ([]Suite, error) {
 	var all []Suite
 
 	for _, filename := range filenames {
-		suites, err := IngestFile(filename)
+		suites, err := ingestFile(filename)
 		if err != nil {
 			return nil, err
 		}
@@ -52,26 +52,24 @@ func IngestFiles(filenames []string) ([]Suite, error) {
 	return all, nil
 }
 
-// IngestFile will parse the given XML file and return a slice of all contained
-// JUnit test suite definitions.
-func IngestFile(filename string) ([]Suite, error) {
-	data, err := ioutil.ReadFile(filename)
+func ingestFile(filename string) ([]Suite, error) {
+	fi, err := os.Open(filename)
 	if err != nil {
 		return nil, err
 	}
-
-	return Ingest(data)
+	defer fi.Close()
+	return Ingest(fi)
 }
 
 // Ingest will parse the given XML data and return a slice of all contained
 // JUnit test suite definitions.
-func Ingest(data []byte) ([]Suite, error) {
+func Ingest(r io.Reader) ([]Suite, error) {
 	var (
 		suiteChan = make(chan Suite)
 		suites    []Suite
 	)
 
-	nodes, err := parse(data)
+	nodes, err := parse(r)
 	if err != nil {
 		return nil, err
 	}
