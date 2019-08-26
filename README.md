@@ -1,9 +1,11 @@
 [![License][license-badge]][license-link]
 [![Godoc][godoc-badge]][godoc-link]
-[![Go Report Card][go-report-badge]][go-report-link]
-[![CircleCI][circleci-badge]][circleci-link]
 
 # Go JUnit
+
+This library is based on this [library from joshdk](https://github.com/joshdk/go-junit)
+It has been changed so that junit.Ingest now takes a io.Reader interface. This means that the whole []slice of xml doesn't need
+to be allocated and passed around and can be buffered by the xml unmarshaller.
 
 🐜 Go library for ingesting JUnit XML reports
 
@@ -12,16 +14,16 @@
 You can fetch this library by running the following
 
 ```bash
-go get -u github.com/joshdk/go-junit
+go get -u github.com/goddenrich/go-junit
 ```
 
 ## Usage
 
 ### Data Ingestion
 
-This library has a number of ingestion methods for convenient.
+This library has a number of ingestion methods for convenience.
 
-The simplest of which parses raw JUnit XML data.
+The simplest of which parses an io.Reader with junit XML data.
 
 ```go
 xml := []byte(`
@@ -45,7 +47,7 @@ xml := []byte(`
     </testsuites>
 `)
 
-suites, err := junit.Ingest(xml)
+suites, err := junit.Ingest(bytes.NewReader(xml))
 if err != nil {
     log.Fatalf("failed to ingest JUnit xml %v", err)
 }
@@ -82,16 +84,21 @@ JUnitXmlReporter.constructor
 
 ### More Examples
 
-Additionally, you can ingest an entire file.
+As a file implements the io.Reader interface it can be used
 
 ```go
-suites, err := junit.IngestFile("test-reports/report.xml")
+fileName = "test-reports/report.xml"
+f, err := os.Open(fileName)
+if err != nil {
+    log.Fatalf("failed to open file %s", fileName)
+}
+suites, err := junit.Ingest("test-reports/report.xml")
 if err != nil {
     log.Fatalf("failed to ingest JUnit xml %v", err)
 }
 ```
 
-Or a list of multiple files.
+You can use IngestFiles to ingest multiple files
 
 ```go
 suites, err := junit.IngestFiles([]string{
@@ -114,16 +121,7 @@ if err != nil {
 
 ### Data Formats
 
-Due to the lack of implementation consistency in software that generates JUnit XML files, this library needs to take a somewhat looser approach to ingestion. As a consequence, many different possible JUnit formats can easily be ingested.
-
-A single top level `testsuite` tag, containing multiple `testcase` instances.
-
-```xml
-<testsuite>
-    <testcase name="Test case 1" />
-    <testcase name="Test case 2" />
-</testsuite>
-```
+Contrary to the library this was based on the format of the xml must have a parent node and can not have a single or multiple top level `testsuite` tag
 
 A single top level `testsuites` tag, containing multiple `testsuite` instances.
 
@@ -135,8 +133,24 @@ A single top level `testsuites` tag, containing multiple `testsuite` instances.
     </testsuite>
 </testsuites>
 ```
+In all cases, omitting (or even duplicated) the XML declaration tag is allowed.
 
-(Despite not technically being valid XML) Multiple top level `testsuite` tags, containing multiple `testcase` instances.
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+```
+
+These formats are invalid and will throw an io.EOF error
+
+A single top level `testsuite` tag, containing multiple `testcase` instances.
+
+```xml
+<testsuite>
+    <testcase name="Test case 1" />
+    <testcase name="Test case 2" />
+</testsuite>
+```
+
+Multiple top level `testsuite` tags, containing multiple `testcase` instances.
 
 ```xml
 <testsuite>
@@ -149,11 +163,6 @@ A single top level `testsuites` tag, containing multiple `testsuite` instances.
 </testsuite>
 ```
 
-In all cases, omitting (or even duplicated) the XML declaration tag is allowed.
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-```
 
 ## License
 
