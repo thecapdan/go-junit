@@ -52,13 +52,18 @@ func IngestFiles(filenames []string) ([]Suite, error) {
 	return all, nil
 }
 
-func ingestFile(filename string) ([]Suite, error) {
-	fi, err := os.Open(filename)
+func ingestFile(filename string) (s []Suite, err error) {
+	f, err := os.Open(filename)
 	if err != nil {
 		return nil, err
 	}
-	defer fi.Close()
-	return Ingest(fi)
+	defer func() {
+		cerr := f.Close()
+		if err == nil {
+			err = cerr
+		}
+	}()
+	return Ingest(f)
 }
 
 // Ingest will parse the given XML data and return a slice of all contained
