@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"encoding/xml"
 	"fmt"
-	"io"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,33 +16,28 @@ import (
 
 func TestParse(t *testing.T) {
 	tests := []struct {
-		title       string
-		input       []byte
-		expected    []xmlNode
-		expectedErr error
+		title    string
+		input    []byte
+		expected []xmlNode
 	}{
 		{
-			title:       "nil input",
-			expectedErr: io.EOF,
+			title: "nil input",
 		},
 		{
-			title:       "empty input",
-			input:       []byte(``),
-			expectedErr: io.EOF,
+			title: "empty input",
+			input: []byte(``),
 		},
 		{
-			title:       "plaintext input",
-			input:       []byte(`This is some data that does not look like xml.`),
-			expectedErr: io.EOF,
+			title: "plaintext input",
+			input: []byte(`This is some data that does not look like xml.`),
 		},
 		{
-			title:       "json input",
-			input:       []byte(`{"This is some data": "that looks like json"}`),
-			expectedErr: io.EOF,
+			title: "json input",
+			input: []byte(`{"This is some data": "that looks like json"}`),
 		},
 		{
 			title: "single xml node",
-			input: []byte(`<t><this-is-a-tag/></t>`),
+			input: []byte(`<this-is-a-tag/>`),
 			expected: []xmlNode{
 				{
 					XMLName: xml.Name{
@@ -55,10 +49,8 @@ func TestParse(t *testing.T) {
 		{
 			title: "multiple xml nodes",
 			input: []byte(`
-				<t>
 				<this-is-a-tag/>
 				<this-is-also-a-tag/>
-				</t>
 			`),
 			expected: []xmlNode{
 				{
@@ -75,7 +67,7 @@ func TestParse(t *testing.T) {
 		},
 		{
 			title: "single xml node with content",
-			input: []byte(`<t><this-is-a-tag>This is some content.</this-is-a-tag></t>`),
+			input: []byte(`<this-is-a-tag>This is some content.</this-is-a-tag>`),
 			expected: []xmlNode{
 				{
 					XMLName: xml.Name{
@@ -87,7 +79,7 @@ func TestParse(t *testing.T) {
 		},
 		{
 			title: "single xml node with attributes",
-			input: []byte(`<t><this-is-a-tag name="my name" status="passed"></this-is-a-tag></t>`),
+			input: []byte(`<this-is-a-tag name="my name" status="passed"></this-is-a-tag>`),
 			expected: []xmlNode{
 				{
 					XMLName: xml.Name{
@@ -108,11 +100,7 @@ func TestParse(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			actual, err := parse(bytes.NewReader(test.input))
 
-			if test.expectedErr != nil {
-				require.Equal(t, test.expectedErr, err)
-			} else {
-				require.Nil(t, err)
-			}
+			require.Nil(t, err)
 
 			assert.Equal(t, test.expected, actual)
 		})

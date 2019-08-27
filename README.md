@@ -122,7 +122,16 @@ if err != nil {
 
 ### Data Formats
 
-Contrary to the library this was based on the format of the xml must have a parent node and can not have a single or multiple top level `testsuite` tag
+Due to the lack of implementation consistency in software that generates JUnit XML files, this library needs to take a somewhat looser approach to ingestion. As a consequence, many different possible JUnit formats can easily be ingested.
+
+A single top level `testsuite` tag, containing multiple `testcase` instances.
+
+```xml
+<testsuite>
+    <testcase name="Test case 1" />
+    <testcase name="Test case 2" />
+</testsuite>
+```
 
 A single top level `testsuites` tag, containing multiple `testsuite` instances.
 
@@ -134,24 +143,8 @@ A single top level `testsuites` tag, containing multiple `testsuite` instances.
     </testsuite>
 </testsuites>
 ```
-In all cases, omitting (or even duplicated) the XML declaration tag is allowed.
 
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-```
-
-These formats are invalid and will throw an io.EOF error
-
-A single top level `testsuite` tag, containing multiple `testcase` instances.
-
-```xml
-<testsuite>
-    <testcase name="Test case 1" />
-    <testcase name="Test case 2" />
-</testsuite>
-```
-
-Multiple top level `testsuite` tags, containing multiple `testcase` instances.
+(Despite not technically being valid XML) Multiple top level `testsuite` tags, containing multiple `testcase` instances.
 
 ```xml
 <testsuite>
@@ -164,6 +157,11 @@ Multiple top level `testsuite` tags, containing multiple `testcase` instances.
 </testsuite>
 ```
 
+In all cases, omitting (or even duplicated) the XML declaration tag is allowed.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+```
 
 ## License
 
