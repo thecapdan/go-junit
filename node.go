@@ -24,13 +24,9 @@ func (n *xmlNode) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	if err := d.DecodeElement((*nodeAlias)(n), &start); err != nil {
 		return err
 	}
-
-	content, err := extractContent(n.Content)
-	if err != nil {
-		return err
+	if len(n.Content) == 0 {
+		n.Content = []byte(nil)
 	}
-
-	n.Content = content
 
 	n.Attrs = attrMap(start.Attr)
 	return nil
