@@ -1,5 +1,6 @@
 [![License][license-badge]][license-link]
 [![Godoc][godoc-badge]][godoc-link]
+[![Go Report Card][go-report-badge]][go-report-link]
 [![CircleCI][circleci-badge]][circleci-link]
 
 # Go JUnit
