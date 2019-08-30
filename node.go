@@ -11,7 +11,7 @@ import (
 type xmlNode struct {
 	XMLName xml.Name
 	Attrs   map[string]string `xml:"-"`
-	Content []byte            `xml:",innerxml"`
+	Content []byte            `xml:",chardata"`
 	Nodes   []xmlNode         `xml:",any"`
 }
 
@@ -27,7 +27,6 @@ func (n *xmlNode) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	if len(n.Content) == 0 {
 		n.Content = []byte(nil)
 	}
-
 	n.Attrs = attrMap(start.Attr)
 	return nil
 }

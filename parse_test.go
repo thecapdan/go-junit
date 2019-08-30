@@ -78,6 +78,30 @@ func TestParse(t *testing.T) {
 			},
 		},
 		{
+			title: "single xml node with encoded content",
+			input: []byte(`<this-is-a-tag>&lt;sender&gt;John Smith&lt;/sender&gt;</this-is-a-tag>`),
+			expected: []xmlNode{
+				{
+					XMLName: xml.Name{
+						Local: "this-is-a-tag",
+					},
+					Content: []byte("<sender>John Smith</sender>"),
+				},
+			},
+		},
+		{
+			title: "single xml node with cdata content",
+			input: []byte(`<this-is-a-tag><![CDATA[<sender>John Smith</sender>]]></this-is-a-tag>`),
+			expected: []xmlNode{
+				{
+					XMLName: xml.Name{
+						Local: "this-is-a-tag",
+					},
+					Content: []byte("<sender>John Smith</sender>"),
+				},
+			},
+		},
+		{
 			title: "single xml node with attributes",
 			input: []byte(`<this-is-a-tag name="my name" status="passed"></this-is-a-tag>`),
 			expected: []xmlNode{
@@ -88,6 +112,20 @@ func TestParse(t *testing.T) {
 					Attrs: map[string]string{
 						"name":   "my name",
 						"status": "passed",
+					},
+				},
+			},
+		},
+		{
+			title: "single xml node with encoded attributes",
+			input: []byte(`<this-is-a-tag name="&lt;sender&gt;John Smith&lt;/sender&gt;"></this-is-a-tag>`),
+			expected: []xmlNode{
+				{
+					XMLName: xml.Name{
+						Local: "this-is-a-tag",
+					},
+					Attrs: map[string]string{
+						"name": "<sender>John Smith</sender>",
 					},
 				},
 			},
