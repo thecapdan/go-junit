@@ -40,6 +40,32 @@ func TestInjest(t *testing.T) {
 				},
 			},
 		},
+		{
+			title: "xml input with skipped test",
+			input: []byte(`<testsuites><testsuite errors="0" skipped="1" file="Foo.java"><testcase name="unit tests" file="Foo.java"><skipped message="foo skip message"/></testcase></testsuite></testsuites>`),
+			expected: []Suite{
+				{
+					Tests: []Test{
+						{
+							Name:   "unit tests",
+							Status: "skipped",
+							Properties: map[string]string{
+								"file": "Foo.java",
+								"name": "unit tests",
+							},
+							Error: Error{
+								Message : "foo skip message",
+							},
+						},
+					},
+					Totals: Totals{
+						Tests:   1,
+						Passed:  0,
+						Skipped: 1,
+					},
+				},
+			},
+		},
 	}
 
 	for index, test := range tests {
