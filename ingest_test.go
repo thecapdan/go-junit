@@ -54,7 +54,7 @@ func TestInjest(t *testing.T) {
 								"name": "unit tests",
 							},
 							Error: Error{
-								Message : "foo skip message",
+								Message: "foo skip message",
 							},
 						},
 					},
