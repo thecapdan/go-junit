@@ -6,6 +6,7 @@ package junit
 
 import (
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -24,12 +25,16 @@ func findSuites(nodes []xmlNode, suites chan Suite) {
 
 func ingestSuite(root xmlNode) Suite {
 	suite := Suite{
-		Name:    root.Attr("name"),
-		Package: root.Attr("package"),
+		Name:       root.Attr("name"),
+		Package:    root.Attr("package"),
+		Properties: root.Attrs,
 	}
 
 	for _, node := range root.Nodes {
 		switch node.XMLName.Local {
+		case "testsuite":
+			testsuite := ingestSuite(node)
+			suite.Suites = append(suite.Suites, testsuite)
 		case "testcase":
 			testcase := ingestTestcase(node)
 			suite.Tests = append(suite.Tests, testcase)
@@ -51,8 +56,7 @@ func ingestProperties(root xmlNode) map[string]string {
 	props := make(map[string]string, len(root.Nodes))
 
 	for _, node := range root.Nodes {
-		switch node.XMLName.Local {
-		case "property":
+		if node.XMLName.Local == "property" {
 			name := node.Attr("name")
 			value := node.Attr("value")
 			props[name] = value
@@ -74,7 +78,6 @@ func ingestTestcase(root xmlNode) Test {
 	for _, node := range root.Nodes {
 		switch node.XMLName.Local {
 		case "skipped":
-			test.Error = ingestError(node)
 			test.Status = StatusSkipped
 		case "failure":
 			test.Error = ingestError(node)
@@ -82,6 +85,10 @@ func ingestTestcase(root xmlNode) Test {
 		case "error":
 			test.Error = ingestError(node)
 			test.Status = StatusError
+		case "system-out":
+			test.SystemOut = string(node.Content)
+		case "system-err":
+			test.SystemErr = string(node.Content)
 		}
 	}
 
@@ -97,6 +104,9 @@ func ingestError(root xmlNode) Error {
 }
 
 func duration(t string) time.Duration {
+	// Remove commas for larger durations
+	t = strings.ReplaceAll(t, ",", "")
+
 	// Check if there was a valid decimal value
 	if s, err := strconv.ParseFloat(t, 64); err == nil {
 		return time.Duration(s*1000000) * time.Microsecond

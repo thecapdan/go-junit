@@ -5,10 +5,6 @@
 
 # Go JUnit
 
-This library is based on this [library from joshdk](https://github.com/joshdk/go-junit)
-It has been changed so that junit.Ingest now takes a io.Reader interface. This means that the whole []slice of xml doesn't need
-to be allocated and passed around and can be buffered by the xml unmarshaller.
-
 🐜 Go library for ingesting JUnit XML reports
 
 ## Installing
@@ -16,7 +12,7 @@ to be allocated and passed around and can be buffered by the xml unmarshaller.
 You can fetch this library by running the following
 
 ```bash
-go get -u github.com/goddenrich/go-junit
+go get -u github.com/joshdk/go-junit
 ```
 
 ## Usage
@@ -25,7 +21,7 @@ go get -u github.com/goddenrich/go-junit
 
 This library has a number of ingestion methods for convenience.
 
-The simplest of which parses an io.Reader with junit XML data.
+The simplest of which parses raw JUnit XML data.
 
 ```go
 xml := []byte(`
@@ -49,7 +45,7 @@ xml := []byte(`
     </testsuites>
 `)
 
-suites, err := junit.Ingest(bytes.NewReader(xml))
+suites, err := junit.Ingest(xml)
 if err != nil {
     log.Fatalf("failed to ingest JUnit xml %v", err)
 }
@@ -86,21 +82,16 @@ JUnitXmlReporter.constructor
 
 ### More Examples
 
-As a file implements the io.Reader interface it can be used
+Additionally, you can ingest an entire file.
 
 ```go
-fileName = "test-reports/report.xml"
-f, err := os.Open(fileName)
-if err != nil {
-    log.Fatalf("failed to open file %s", fileName)
-}
-suites, err := junit.Ingest("test-reports/report.xml")
+suites, err := junit.IngestFile("test-reports/report.xml")
 if err != nil {
     log.Fatalf("failed to ingest JUnit xml %v", err)
 }
 ```
 
-You can use IngestFiles to ingest multiple files
+Or a list of multiple files.
 
 ```go
 suites, err := junit.IngestFiles([]string{
@@ -164,16 +155,26 @@ In all cases, omitting (or even duplicated) the XML declaration tag is allowed.
 <?xml version="1.0" encoding="UTF-8"?>
 ```
 
+## Contributing
+
+Found a bug or want to make go-junit better? Please [open a pull request](https://github.com/joshdk/go-junit/compare)!
+
+To make things easier, try out the following:
+
+- Running `make test` will run the test suite to verify behavior.
+
+- Running `make lint` will format the code, and report any linting issues using [golangci/golangci-lint](https://github.com/golangci/golangci-lint).
+
 ## License
 
 This code is distributed under the [MIT License][license-link], see [LICENSE.txt][license-file] for more information.
 
-[circleci-badge]:   https://circleci.com/gh/goddenrich/go-junit.svg?&style=shield
-[circleci-link]:    https://circleci.com/gh/goddenrich/go-junit/tree/master
-[go-report-badge]:  https://goreportcard.com/badge/github.com/goddenrich/go-junit
-[go-report-link]:   https://goreportcard.com/report/github.com/goddenrich/go-junit
-[godoc-badge]:      https://godoc.org/github.com/goddenrich/go-junit?status.svg
-[godoc-link]:       https://godoc.org/github.com/goddenrich/go-junit
+[circleci-badge]:   https://circleci.com/gh/joshdk/go-junit.svg?&style=shield
+[circleci-link]:    https://circleci.com/gh/joshdk/go-junit/tree/master
+[go-report-badge]:  https://goreportcard.com/badge/github.com/joshdk/go-junit
+[go-report-link]:   https://goreportcard.com/report/github.com/joshdk/go-junit
+[godoc-badge]:      https://godoc.org/github.com/joshdk/go-junit?status.svg
+[godoc-link]:       https://godoc.org/github.com/joshdk/go-junit
 [license-badge]:    https://img.shields.io/badge/license-MIT-green.svg
-[license-file]:     https://github.com/goddenrich/go-junit/blob/master/LICENSE.txt
+[license-file]:     https://github.com/joshdk/go-junit/blob/master/LICENSE.txt
 [license-link]:     https://opensource.org/licenses/MIT

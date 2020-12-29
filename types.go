@@ -5,6 +5,7 @@
 package junit
 
 import (
+	"strings"
 	"time"
 )
 
@@ -73,6 +74,9 @@ type Suite struct {
 	// Tests is an ordered collection of tests with associated results.
 	Tests []Test `json:"tests,omitempty" yaml:"tests,omitempty"`
 
+	// Suites is an ordered collection of suites with associated tests.
+	Suites []Suite `json:"suites,omitempty" yaml:"suites,omitempty"`
+
 	// SystemOut is textual test output for the suite. Usually output that is
 	// written to stdout.
 	SystemOut string `json:"stdout,omitempty" yaml:"stdout,omitempty"`
@@ -85,7 +89,7 @@ type Suite struct {
 	Totals Totals `json:"totals" yaml:"totals"`
 }
 
-// Aggregate calculates result sums across all tests.
+// Aggregate calculates result sums across all tests and nested suites.
 func (s *Suite) Aggregate() {
 	totals := Totals{Tests: len(s.Tests)}
 
@@ -101,6 +105,17 @@ func (s *Suite) Aggregate() {
 		case StatusError:
 			totals.Error++
 		}
+	}
+
+	// just summing totals from nested suites
+	for _, suite := range s.Suites {
+		suite.Aggregate()
+		totals.Tests += suite.Totals.Tests
+		totals.Duration += suite.Totals.Duration
+		totals.Passed += suite.Totals.Passed
+		totals.Skipped += suite.Totals.Skipped
+		totals.Failed += suite.Totals.Failed
+		totals.Error += suite.Totals.Error
 	}
 
 	s.Totals = totals
@@ -131,6 +146,14 @@ type Test struct {
 	// Additional properties from XML node attributes.
 	// Some tools use them to store additional information about test location.
 	Properties map[string]string `json:"properties" yaml:"properties"`
+
+	// SystemOut is textual output for the test case. Usually output that is
+	// written to stdout.
+	SystemOut string `json:"stdout,omitempty" yaml:"stdout,omitempty"`
+
+	// SystemErr is textual error output for the test case. Usually output that is
+	// written to stderr.
+	SystemErr string `json:"stderr,omitempty" yaml:"stderr,omitempty"`
 }
 
 // Error represents an erroneous test result.
@@ -150,5 +173,14 @@ type Error struct {
 
 // Error returns a textual description of the test error.
 func (err Error) Error() string {
-	return err.Body
+	switch {
+	case strings.TrimSpace(err.Body) != "":
+		return err.Body
+
+	case strings.TrimSpace(err.Message) != "":
+		return err.Message
+
+	default:
+		return err.Type
+	}
 }

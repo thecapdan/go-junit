@@ -5,6 +5,7 @@
 package junit
 
 import (
+	"bytes"
 	"io"
 	"os"
 	"path/filepath"
@@ -39,10 +40,10 @@ func IngestDir(directory string) ([]Suite, error) {
 // IngestFiles will parse the given XML files and return a slice of all
 // contained JUnit test suite definitions.
 func IngestFiles(filenames []string) ([]Suite, error) {
-	var all []Suite
+	var all = make([]Suite, 0)
 
 	for _, filename := range filenames {
-		suites, err := ingestFile(filename)
+		suites, err := IngestFile(filename)
 		if err != nil {
 			return nil, err
 		}
@@ -52,29 +53,27 @@ func IngestFiles(filenames []string) ([]Suite, error) {
 	return all, nil
 }
 
-func ingestFile(filename string) (s []Suite, err error) {
-	f, err := os.Open(filename)
+// IngestFile will parse the given XML file and return a slice of all contained
+// JUnit test suite definitions.
+func IngestFile(filename string) ([]Suite, error) {
+	file, err := os.Open(filename)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		cerr := f.Close()
-		if err == nil {
-			err = cerr
-		}
-	}()
-	return Ingest(f)
+	defer file.Close()
+
+	return IngestReader(file)
 }
 
-// Ingest will parse the given XML data and return a slice of all contained
-// JUnit test suite definitions.
-func Ingest(r io.Reader) ([]Suite, error) {
+// IngestReader will parse the given XML reader and return a slice of all
+// contained JUnit test suite definitions.
+func IngestReader(reader io.Reader) ([]Suite, error) {
 	var (
 		suiteChan = make(chan Suite)
-		suites    []Suite
+		suites    = make([]Suite, 0)
 	)
 
-	nodes, err := parse(r)
+	nodes, err := parse(reader)
 	if err != nil {
 		return nil, err
 	}
@@ -89,4 +88,10 @@ func Ingest(r io.Reader) ([]Suite, error) {
 	}
 
 	return suites, nil
+}
+
+// Ingest will parse the given XML data and return a slice of all contained
+// JUnit test suite definitions.
+func Ingest(data []byte) ([]Suite, error) {
+	return IngestReader(bytes.NewReader(data))
 }

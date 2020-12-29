@@ -4,14 +4,12 @@
 
 package junit
 
-import (
-	"encoding/xml"
-)
+import "encoding/xml"
 
 type xmlNode struct {
 	XMLName xml.Name
 	Attrs   map[string]string `xml:"-"`
-	Content []byte            `xml:",chardata"`
+	Content []byte            `xml:",innerxml"`
 	Nodes   []xmlNode         `xml:",any"`
 }
 
@@ -24,9 +22,14 @@ func (n *xmlNode) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	if err := d.DecodeElement((*nodeAlias)(n), &start); err != nil {
 		return err
 	}
-	if len(n.Content) == 0 {
-		n.Content = []byte(nil)
+
+	content, err := extractContent(n.Content)
+	if err != nil {
+		return err
 	}
+
+	n.Content = content
+
 	n.Attrs = attrMap(start.Attr)
 	return nil
 }
