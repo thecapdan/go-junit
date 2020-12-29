@@ -78,6 +78,7 @@ func ingestTestcase(root xmlNode) Test {
 	for _, node := range root.Nodes {
 		switch node.XMLName.Local {
 		case "skipped":
+			test.Error = ingestError(node)
 			test.Status = StatusSkipped
 		case "failure":
 			test.Error = ingestError(node)
